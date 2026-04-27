@@ -1,0 +1,6 @@
+[Unit]
+Description=VPS health check
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/vps-health

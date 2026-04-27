@@ -1,0 +1,22 @@
+services:
+  caddy:
+    image: caddy:2
+    container_name: wormlogic-caddy
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/sites:/etc/caddy/sites:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  whoami:
+    image: traefik/whoami
+    container_name: wormlogic-whoami
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
+
+volumes:
+  caddy_data:
+  caddy_config:
