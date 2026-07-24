@@ -1,5 +1,0 @@
-{
-	email admin@wormlogic.com
-}
-
-import /etc/caddy/sites/*.caddy

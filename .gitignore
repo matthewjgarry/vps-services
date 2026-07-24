@@ -1,2 +1,38 @@
+# Decrypted secrets and generated runtime files
+runtime/
+*.dec
+*.plaintext
+
+# Local environment files
 .env
-secrets/*
+.env.*
+!.env.example
+env/*.env
+!env/*.env.example
+!env/*.example
+
+# Persistent Caddy data
+config/caddy/data/*
+!config/caddy/data/.gitkeep
+config/caddy/config/*
+!config/caddy/config/.gitkeep
+
+# PostgreSQL data
+config/postgres/data/
+!config/postgres/.gitkeep
+
+# n8n runtime data
+config/n8n/data/*
+!config/n8n/data/.gitkeep
+
+# Beszel runtime data
+config/beszel/data/*
+!config/beszel/data/.gitkeep
+
+# Local backup copies
+*.bak
+*.backup
+
+# Miscellaneous
+*.log
+.DS_Store

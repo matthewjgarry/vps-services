@@ -1,0 +1,82 @@
+services:
+  caddy:
+    container_name: caddy
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
+    restart: unless-stopped
+    env_file:
+      - ./runtime/vps01/secrets/caddy.env
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./config/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./config/caddy/data:/data
+      - ./config/caddy/config:/config
+    networks:
+      - proxy
+
+  postgres:
+    container_name: postgres
+    image: postgres:17-alpine
+    restart: unless-stopped
+    env_file:
+      - ./runtime/vps01/secrets/postgres.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - ./config/postgres/data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  n8n:
+    container_name: n8n
+    image: docker.n8n.io/n8nio/n8n:latest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./runtime/vps01/secrets/n8n.env
+    environment:
+      N8N_HOST: ops.wormlogic.com
+      N8N_PORT: 5678
+      N8N_PROTOCOL: https
+      N8N_EDITOR_BASE_URL: https://ops.wormlogic.com
+      WEBHOOK_URL: https://ops.wormlogic.com
+      GENERIC_TIMEZONE: America/New_York
+      TZ: America/New_York
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+    volumes:
+      - ./config/n8n/data:/home/node/.n8n
+    networks:
+      - backend
+      - proxy
+
+  beszel:
+    container_name: beszel
+    image: henrygd/beszel:latest
+    restart: unless-stopped
+    volumes:
+      - ./config/beszel/data:/beszel_data
+    networks:
+      - proxy
+
+  whoami:
+    container_name: whoami
+    image: traefik/whoami:latest
+    command:
+      - --port=8080
+    restart: unless-stopped
+    networks:
+      - proxy
+
+networks:
+  backend:
+  proxy:
