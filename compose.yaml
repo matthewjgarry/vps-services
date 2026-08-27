@@ -73,6 +73,8 @@ services:
       - ./config/beszel/data:/beszel_data
     networks:
       - proxy
+    extra_hosts:
+      - "ops.wormlogic.com:host-gateway"
 
   whoami:
     container_name: whoami
