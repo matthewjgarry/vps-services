@@ -20,7 +20,7 @@ services:
 
   postgres:
     container_name: postgres
-    image: postgres:17-alpine
+    image: postgres:17-trixie
     restart: unless-stopped
     env_file:
       - ./runtime/vps01/secrets/postgres.env
@@ -61,30 +61,50 @@ services:
 
   beszel:
     container_name: beszel
-    image: henrygd/beszel:0.18.8
+    image: henrygd/beszel:latest
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "/beszel", "health", "--url", "http://localhost:8090"]
-      interval: 120s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
     volumes:
       - ./config/beszel/data:/beszel_data
     networks:
       - proxy
-    extra_hosts:
-      - "ops.wormlogic.com:host-gateway"
 
-  whoami:
-    container_name: whoami
-    image: traefik/whoami:latest
-    command:
-      - --port=8080
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
     restart: unless-stopped
+    environment:
+      TZ: America/New_York
+      FTLCONF_dns_listeningMode: "ALL"
+      FTLCONF_dns_upstreams: "9.9.9.9;149.112.112.112"
+      WEBPASSWORD_FILE: pihole_web_password
+    secrets:
+      - pihole_web_password
+    volumes:
+      - ./config/pihole:/etc/pihole
+    ports:
+      # Bootstrap/testing only. Nothing exposed on Heighliner's public address.
+      - "127.0.0.1:1053:53/tcp"
+      - "127.0.0.1:1053:53/udp"
+      - "127.0.0.1:8081:80/tcp"
+      # PVP WireGuard clients
+      - "10.9.0.1:53:53/tcp"
+      - "10.9.0.1:53:53/udp"
+      - "10.9.0.1:8081:80/tcp"
     networks:
-      - proxy
+      dns:
+        ipv4_address: 172.21.0.2
+
+secrets:
+  pihole_web_password:
+    file: ./runtime/vps01/secrets/pihole_web_password.txt
 
 networks:
   backend:
   proxy:
+  dns:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-pihole
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24

@@ -7,16 +7,20 @@ MACHINE_ID="${MACHINE_ID:-vps01}"
 SECRETS_DIR="${REPO_ROOT}/secrets/${MACHINE_ID}"
 RUNTIME_DIR="${REPO_ROOT}/runtime/${MACHINE_ID}/secrets"
 
-required_secrets=(
+dotenv_secrets=(
   "postgres.env"
   "n8n.env"
   "caddy.env"
 )
 
+text_secrets=(
+  "pihole_web_password.txt"
+)
+
 mkdir -p "${RUNTIME_DIR}"
 chmod 700 "${RUNTIME_DIR}"
 
-for secret in "${required_secrets[@]}"; do
+for secret in "${dotenv_secrets[@]}"; do
   encrypted_file="${SECRETS_DIR}/${secret}.enc"
   runtime_file="${RUNTIME_DIR}/${secret}"
 
@@ -28,6 +32,24 @@ for secret in "${required_secrets[@]}"; do
   sops --decrypt \
     --input-type dotenv \
     --output-type dotenv \
+    --output "${runtime_file}" \
+    "${encrypted_file}"
+
+  chmod 600 "${runtime_file}"
+done
+
+for secret in "${text_secrets[@]}"; do
+  encrypted_file="${SECRETS_DIR}/${secret}.enc"
+  runtime_file="${RUNTIME_DIR}/${secret}"
+
+  if [[ ! -f "${encrypted_file}" ]]; then
+    printf 'Missing encrypted secret: %s\n' "${encrypted_file}" >&2
+    exit 1
+  fi
+
+  sops --decrypt \
+    --input-type binary \
+    --output-type binary \
     --output "${runtime_file}" \
     "${encrypted_file}"
 

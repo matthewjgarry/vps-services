@@ -36,3 +36,9 @@ config/beszel/data/*
 # Miscellaneous
 *.log
 .DS_Store
+
+# Pi-hole runtime state
+/config/pihole/
+
+# Local PostgreSQL backups
+/backups/postgres/*.sql
