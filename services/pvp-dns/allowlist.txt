@@ -1,0 +1,4 @@
+www.torproject.org
+dist.torproject.org
+aus1.torproject.org
+static.torproject.org

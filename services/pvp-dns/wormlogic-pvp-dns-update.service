@@ -1,0 +1,19 @@
+[Unit]
+Description=Refresh Wormlogic PVP DNS blocklists
+Wants=network-online.target
+After=network-online.target wormlogic-pvp.service
+Before=unbound.service
+
+[Service]
+Type=oneshot
+TimeoutStartSec=20min
+
+ExecStartPre=/usr/local/lib/wormlogic-pvp-dns/ensure-host-state.sh
+ExecStart=/usr/local/lib/wormlogic-pvp-dns/build-blocklists.py
+
+ExecStartPost=/usr/bin/chown unbound:unbound /var/lib/unbound/pvp-dnsbl.sqlite
+ExecStartPost=/usr/sbin/unbound-checkconf
+ExecStartPost=/usr/bin/systemctl --no-block try-restart unbound.service
+
+[Install]
+WantedBy=multi-user.target

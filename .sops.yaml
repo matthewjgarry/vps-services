@@ -1,3 +1,4 @@
 creation_rules:
   - path_regex: secrets/vps01/.*\.enc$
-    age: age1vnmnxtka7hgnglxs7kgun3qc5td0ugf55459hwjupum49rp0ka3qy0ly4w
+    age: >-
+      age1dzky77txyrdnxr6tpu9mntar5xk6cl4rlr6lp5ywfwnhpkhmndksup8f8c

@@ -75,7 +75,7 @@ services:
     environment:
       TZ: America/New_York
       FTLCONF_dns_listeningMode: "ALL"
-      FTLCONF_dns_upstreams: "9.9.9.9;149.112.112.112"
+      FTLCONF_dns_upstreams: "172.21.0.1#5335"
       WEBPASSWORD_FILE: pihole_web_password
     secrets:
       - pihole_web_password
